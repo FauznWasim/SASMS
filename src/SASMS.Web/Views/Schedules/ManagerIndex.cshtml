@@ -1,0 +1,42 @@
+@model List<Schedule>
+@{
+    ViewData["Title"] = "Shift Schedules";
+}
+
+<h2>Shift Schedules</h2>
+<p><a asp-action="Create" class="btn btn-primary">+ New Schedule</a></p>
+
+<div class="card">
+    <div class="card-body">
+        @if (Model.Count == 0)
+        {
+            <partial name="_EmptyState" model="@("No shifts scheduled yet.")" />
+        }
+        else
+        {
+        <div class="table-responsive">
+            <table class="table table-striped mb-0">
+                <thead><tr><th>Employee</th><th>Date</th><th>Start</th><th>End</th><th>Notes</th><th></th></tr></thead>
+                <tbody>
+                    @foreach (var s in Model)
+                    {
+                        <tr>
+                            <td>@s.Employee.FullName</td>
+                            <td>@s.ShiftDate</td>
+                            <td>@s.StartTime</td>
+                            <td>@s.EndTime</td>
+                            <td>@s.Notes</td>
+                            <td>
+                                <a asp-action="Edit" asp-route-id="@s.ScheduleId" class="btn btn-sm btn-outline-primary">Edit</a>
+                                <form asp-action="Delete" asp-route-id="@s.ScheduleId" method="post" class="d-inline" data-confirm="Delete this shift?">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        }
+    </div>
+</div>

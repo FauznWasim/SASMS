@@ -1,0 +1,91 @@
+@model List<Attendance>
+@inject SASMS.Web.Security.IBusinessClock BusinessClock
+@{
+    ViewData["Title"] = "All Attendance";
+    var employees = (List<Employee>)ViewBag.Employees;
+}
+
+<h2>All Attendance</h2>
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col-auto">
+        <input type="date" name="from" class="form-control" value="@Context.Request.Query["from"]" />
+    </div>
+    <div class="col-auto">
+        <input type="date" name="to" class="form-control" value="@Context.Request.Query["to"]" />
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-outline-primary">Filter</button>
+    </div>
+</form>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <h6 class="card-title">Mark an employee absent</h6>
+        <form asp-action="MarkAbsent" method="post" class="row g-2">
+            <div class="col-auto">
+                <select name="employeeId" class="form-select" required>
+                    <option value="">-- Select employee --</option>
+                    @foreach (var e in employees)
+                    {
+                        <option value="@e.EmployeeId">@e.FullName</option>
+                    }
+                </select>
+            </div>
+            <div class="col-auto">
+                <input type="date" name="date" class="form-control" required value="@BusinessClock.Today.ToString("yyyy-MM-dd")" />
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-outline-danger">Mark Absent</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        @if (Model.Count == 0)
+        {
+            <partial name="_EmptyState" model="@("No attendance records for this date range.")" />
+        }
+        else
+        {
+        <div class="table-responsive">
+            <table class="table table-striped mb-0">
+                <thead>
+                    <tr><th>Employee</th><th>Date</th><th>Check In</th><th>Check Out</th><th>Status</th><th>Verification</th><th></th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var a in Model)
+                    {
+                        <tr>
+                            <td>@a.Employee.FullName</td>
+                            <td>@a.AttendanceDate</td>
+                            <td>@(a.CheckInTime is not null ? BusinessClock.ToMalaysiaTime(a.CheckInTime.Value).ToString() : "")</td>
+                            <td>@(a.CheckOutTime is not null ? BusinessClock.ToMalaysiaTime(a.CheckOutTime.Value).ToString() : "")</td>
+                            <td><partial name="_StatusBadge" model="a.AttendanceStatus.ToBadge()" /></td>
+                            <td><partial name="_StatusBadge" model="a.VerificationStatus.ToBadge()" /></td>
+                            <td>
+                                @if (a.VerificationStatus == VerificationStatus.Pending || a.VerificationStatus == VerificationStatus.Failed)
+                                {
+                                    <form asp-action="ManualVerify" method="post" class="d-inline" data-confirm="This manual override is being used instead of facial/liveness verification, and is audit logged. Continue?">
+                                        <input type="hidden" name="attendanceId" value="@a.AttendanceId" />
+                                        <button type="submit" class="btn btn-sm btn-outline-warning">Manually Verify</button>
+                                    </form>
+                                }
+                                @if (a.VerificationStatus == VerificationStatus.Verified && a.CheckInTime is not null && a.CheckOutTime is null)
+                                {
+                                    <form asp-action="ManualCheckOut" method="post" class="d-inline" data-confirm="This manual override is being used instead of the check-out face scan, and is audit logged. Continue?">
+                                        <input type="hidden" name="attendanceId" value="@a.AttendanceId" />
+                                        <button type="submit" class="btn btn-sm btn-outline-warning">Manually Check Out</button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        }
+    </div>
+</div>

@@ -1,0 +1,112 @@
+# Production-oriented Docker Compose stack for a temporary DigitalOcean Droplet deployment
+# of SASMS. Only `nginx` publishes ports to the host — mysql and face-service are reachable
+# solely from other containers on the `sasms-internal` network, never from the Internet.
+#
+# All secrets (MySQL password, both shared secrets) come from environment variables, read
+# from a local `.env` file (gitignored — see .env.example for the template, never commit
+# the real one).
+
+services:
+  mysql:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes" # root is never used by the app — see MYSQL_USER below
+      MYSQL_DATABASE: sasms_db
+      MYSQL_USER: ${MYSQL_APP_USER}
+      MYSQL_PASSWORD: ${MYSQL_APP_PASSWORD}
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - sasms-internal
+    # No `ports:` — intentionally not reachable from the host or the Internet.
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u${MYSQL_APP_USER}", "-p${MYSQL_APP_PASSWORD}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+
+  face-service:
+    build:
+      context: .
+      dockerfile: face-service/Dockerfile
+    restart: unless-stopped
+    environment:
+      FACE_SERVICE_SHARED_SECRET: ${FACE_SERVICE_SHARED_SECRET}
+      # Only this deployment needs this — see app.py's own comment on why. Default stays
+      # 127.0.0.1 (unset) for local/Windows `python app.py` usage.
+      FACE_SERVICE_HOST: "0.0.0.0"
+    volumes:
+      - face-data:/app/data
+      - face-models:/app/models
+    networks:
+      - sasms-internal
+    # No `ports:` — this is the whole point: reachable only from `web`, on the private
+    # Docker network, never published to the host or the Internet.
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:5100/health', timeout=3).status == 200 else 1)"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+
+  web:
+    build:
+      context: .
+      dockerfile: src/SASMS.Web/Dockerfile
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: "http://+:8080"
+      ConnectionStrings__DefaultConnection: "Server=mysql;Port=3306;Database=sasms_db;User=${MYSQL_APP_USER};Password=${MYSQL_APP_PASSWORD};TreatTinyAsBoolean=false;"
+      FaceVerificationService__BaseUrl: "http://face-service:5100"
+      FaceVerificationService__SharedSecret: ${FACE_SERVICE_SHARED_SECRET}
+      VerificationService__SharedSecret: ${VERIFICATION_SERVICE_SHARED_SECRET}
+      # Must match this file's `sasms-internal` network subnet below — Program.cs only
+      # trusts X-Forwarded-For/-Proto headers that arrive from inside this exact subnet
+      # (i.e. from `nginx`, the only other container on it), never from an arbitrary host.
+      ReverseProxy__TrustedNetwork: "172.28.0.0/16"
+    volumes:
+      - leave-attachments:/app/App_Data/LeaveAttachments
+    depends_on:
+      mysql:
+        condition: service_healthy
+      face-service:
+        condition: service_healthy
+    networks:
+      - sasms-internal
+    # No `ports:` — only `nginx` is reachable from the host; it proxies to `web:8080`
+    # over the private network.
+
+  nginx:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/certs:/etc/nginx/certs:ro
+    depends_on:
+      - web
+    networks:
+      - sasms-internal
+
+networks:
+  sasms-internal:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
+
+volumes:
+  mysql-data:
+  # Registered-face biometric data (model.yml, labels.txt, faces/*.jpg) — must survive
+  # container recreation. Never copied into the face-service image (see .dockerignore).
+  face-data:
+  # The downloaded MediaPipe landmark model (face_landmarker.task) — also must survive
+  # container recreation; see face-service/README.md for the one-time download step.
+  face-models:
+  # Leave application supporting documents — must survive container recreation.
+  leave-attachments:

@@ -1,0 +1,55 @@
+@model List<MonthlyAttendanceRow>
+@{
+    ViewData["Title"] = "Monthly Attendance Report";
+    int year = ViewBag.Year;
+    int month = ViewBag.Month;
+}
+
+<h2>Monthly Attendance Report</h2>
+
+<div class="card">
+    <div class="card-body">
+        <form method="get" class="row g-2 mb-3">
+            <div class="col-auto">
+                <input type="number" name="year" class="form-control" value="@year" />
+            </div>
+            <div class="col-auto">
+                <input type="number" name="month" class="form-control" min="1" max="12" value="@month" />
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-outline-primary">View</button>
+            </div>
+            <div class="col-auto">
+                <a class="btn btn-outline-secondary" asp-action="MonthlyExport" asp-route-year="@year" asp-route-month="@month">Export CSV</a>
+            </div>
+        </form>
+
+        @if (Model.Count == 0)
+        {
+            <partial name="_EmptyState" model="@("No attendance data for this month.")" />
+        }
+        else
+        {
+        <div class="table-responsive">
+            <table class="table table-striped mb-0">
+                <thead>
+                    <tr><th>Employee</th><th>Present</th><th>Late</th><th>Absent</th><th>On Leave</th><th>Total Hours</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var r in Model)
+                    {
+                        <tr>
+                            <td>@r.EmployeeName</td>
+                            <td>@r.DaysPresent</td>
+                            <td>@r.DaysLate</td>
+                            <td>@r.DaysAbsent</td>
+                            <td>@r.DaysOnLeave</td>
+                            <td>@r.TotalHoursWorked.ToString("0.##")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        }
+    </div>
+</div>

@@ -1,0 +1,50 @@
+@model List<LeaveApplication>
+@{
+    ViewData["Title"] = "My Leave Applications";
+}
+
+<h2>My Leave Applications</h2>
+
+<a asp-action="Apply" class="btn btn-primary mb-3">Apply for Leave</a>
+
+<div class="card">
+    <div class="card-body">
+        @if (Model.Count == 0)
+        {
+            <partial name="_EmptyState" model="@("You haven't applied for any leave yet.")" />
+        }
+        else
+        {
+        <div class="table-responsive">
+            <table class="table table-striped mb-0">
+                <thead>
+                    <tr><th>Type</th><th>Start</th><th>End</th><th>Reason</th><th>Status</th><th>Manager Remarks</th><th>Document</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var l in Model)
+                    {
+                        <tr>
+                            <td>@l.LeaveType</td>
+                            <td>@l.StartDate</td>
+                            <td>@l.EndDate</td>
+                            <td>@l.Reason</td>
+                            <td><partial name="_StatusBadge" model="l.Status.ToBadge()" /></td>
+                            <td>@l.ReviewRemarks</td>
+                            <td>
+                                @if (l.AttachmentStoredFileName is not null)
+                                {
+                                    <a asp-action="Attachment" asp-route-id="@l.LeaveApplicationId" target="_blank" class="btn btn-sm btn-outline-secondary">View Attachment</a>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">&mdash;</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        }
+    </div>
+</div>

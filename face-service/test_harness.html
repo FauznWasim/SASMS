@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>face-service test harness (dev only, not part of SASMS)</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 640px; margin: 2rem auto; }
+  video { width: 100%; background: #000; border-radius: 8px; }
+  pre { background: #f3f3f3; padding: 1rem; border-radius: 8px; white-space: pre-wrap; }
+  label { display: block; margin-top: 1rem; font-weight: 600; }
+  input, button { font-size: 1rem; padding: 0.4rem 0.6rem; margin-top: 0.25rem; }
+  button { cursor: pointer; }
+</style>
+</head>
+<body>
+  <h1>face-service test harness</h1>
+  <p>Throwaway dev tool for testing /register and /verify in isolation, before wiring up
+     the real ASP.NET Core integration. Not part of the SASMS application.</p>
+
+  <video id="preview" autoplay muted playsinline></video>
+  <canvas id="canvas" style="display:none"></canvas>
+
+  <label for="secret">Shared secret (matches FACE_SERVICE_SHARED_SECRET env var)</label>
+  <input id="secret" type="text" size="40" />
+
+  <label for="employeeId">Test employee id</label>
+  <input id="employeeId" type="text" value="999" />
+
+  <p>
+    <button id="registerBtn">Register (capture 5 frames)</button>
+    <button id="verifyBtn">Verify (capture 15 frames over ~2s)</button>
+  </p>
+
+  <pre id="output">Result will appear here.</pre>
+
+<script>
+const video = document.getElementById('preview');
+const canvas = document.getElementById('canvas');
+const output = document.getElementById('output');
+
+navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
+  video.srcObject = stream;
+}).catch(err => {
+  output.textContent = 'Camera error: ' + err;
+});
+
+function captureFrame() {
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  canvas.getContext('2d').drawImage(video, 0, 0);
+  return canvas.toDataURL('image/jpeg', 0.8);
+}
+
+async function captureBurst(count, intervalMs) {
+  const frames = [];
+  for (let i = 0; i < count; i++) {
+    frames.push(captureFrame());
+    await new Promise(r => setTimeout(r, intervalMs));
+  }
+  return frames;
+}
+
+async function post(path, body) {
+  // Relative URL: this page is served by the same Flask app it's testing (see app.py's
+  // /test route), so the request is same-origin and needs no CORS handling at all.
+  const resp = await fetch(path, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Face-Service-Secret': document.getElementById('secret').value
+    },
+    body: JSON.stringify(body)
+  });
+  return { status: resp.status, body: await resp.json() };
+}
+
+document.getElementById('registerBtn').addEventListener('click', async () => {
+  output.textContent = 'Capturing...';
+  const images = await captureBurst(5, 200);
+  output.textContent = 'Uploading...';
+  const result = await post('/register', {
+    employeeId: document.getElementById('employeeId').value,
+    images
+  });
+  output.textContent = JSON.stringify(result, null, 2);
+});
+
+document.getElementById('verifyBtn').addEventListener('click', async () => {
+  output.textContent = 'Capturing (keep your face in frame, blink naturally)...';
+  const frames = await captureBurst(15, 150);
+  output.textContent = 'Uploading...';
+  const result = await post('/verify', {
+    employeeId: document.getElementById('employeeId').value,
+    frames
+  });
+  output.textContent = JSON.stringify(result, null, 2);
+});
+</script>
+</body>
+</html>

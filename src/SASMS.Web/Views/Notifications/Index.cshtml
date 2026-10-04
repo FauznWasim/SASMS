@@ -1,0 +1,31 @@
+@model List<Notification>
+@inject SASMS.Web.Security.IBusinessClock BusinessClock
+@{
+    ViewData["Title"] = "Notifications";
+}
+
+<h2>Notifications</h2>
+
+@if (!Model.Any())
+{
+    <partial name="_EmptyState" model="@("You have no notifications.")" />
+}
+
+<div class="list-group">
+    @foreach (var n in Model)
+    {
+        <div class="list-group-item @(n.IsRead ? "" : "notification-unread")">
+            <div class="d-flex w-100 justify-content-between">
+                <h6 class="mb-1">@n.Title</h6>
+                <small>@BusinessClock.ToMalaysiaTime(n.CreatedAtUtc)</small>
+            </div>
+            <p class="mb-1">@n.Message</p>
+            @if (!n.IsRead)
+            {
+                <form asp-action="MarkRead" asp-route-id="@n.NotificationId" method="post">
+                    <button type="submit" class="btn btn-sm btn-outline-secondary">Mark as read</button>
+                </form>
+            }
+        </div>
+    }
+</div>

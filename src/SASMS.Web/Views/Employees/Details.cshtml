@@ -1,0 +1,81 @@
+@model EmployeeDetailsViewModel
+@{
+    ViewData["Title"] = "Employee Details";
+    var employee = Model.Employee;
+}
+
+<h2>@employee.FullName</h2>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <dl class="row mb-0">
+            <dt class="col-sm-2">Email</dt><dd class="col-sm-10">@employee.Email</dd>
+            <dt class="col-sm-2">Phone</dt><dd class="col-sm-10">@employee.Phone</dd>
+            <dt class="col-sm-2">Position</dt><dd class="col-sm-10">@employee.Position</dd>
+            <dt class="col-sm-2">Department</dt><dd class="col-sm-10">@employee.Department</dd>
+            <dt class="col-sm-2">Date Joined</dt><dd class="col-sm-10">@employee.DateJoined.ToString("yyyy-MM-dd")</dd>
+            <dt class="col-sm-2">Login Username</dt><dd class="col-sm-10">@(employee.User?.Username ?? "-")</dd>
+            <dt class="col-sm-2">Account Role</dt><dd class="col-sm-10">@(employee.User?.Role?.RoleName ?? "-")</dd>
+            <dt class="col-sm-2">Employment Status</dt>
+            <dd class="col-sm-10"><partial name="_StatusBadge" model="employee.EmploymentStatus.ToBadge()" /></dd>
+        </dl>
+    </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <h5 class="card-title">Today's Face Verification</h5>
+        <dl class="row mb-0">
+            <dt class="col-sm-3">Check-in attempts used</dt>
+            <dd class="col-sm-9">@Model.AttemptStatus.CheckInAttemptsUsed / 3 @(Model.AttemptStatus.CheckInBlocked ? "(blocked)" : "")</dd>
+            <dt class="col-sm-3">Check-out attempts used</dt>
+            <dd class="col-sm-9">@Model.AttemptStatus.CheckOutAttemptsUsed / 3 @(Model.AttemptStatus.CheckOutBlocked ? "(blocked)" : "")</dd>
+        </dl>
+
+        @if (Model.AttemptStatus.CheckInAttemptsUsed > 0 || Model.AttemptStatus.CheckOutAttemptsUsed > 0)
+        {
+            <form asp-controller="Attendance" asp-action="ResetAttempts" asp-route-employeeId="@employee.EmployeeId" method="post" class="d-inline mt-2" data-confirm="Reset today's failed verification attempt counters for @employee.FullName?">
+                <button type="submit" class="btn btn-outline-secondary btn-sm">Reset Attempts</button>
+            </form>
+        }
+
+        @if (Model.AttemptStatus.CheckInBlocked && !Model.HasTodayRecord)
+        {
+            <form asp-controller="Attendance" asp-action="ManualCheckIn" asp-route-employeeId="@employee.EmployeeId" method="post" class="d-inline mt-2" data-confirm="This manual override records a Verified check-in for @employee.FullName without a live face scan, and is audit logged. Continue?">
+                <button type="submit" class="btn btn-outline-secondary btn-sm">Manually Check In</button>
+            </form>
+        }
+    </div>
+</div>
+
+<a asp-action="Edit" asp-route-id="@employee.EmployeeId" class="btn btn-outline-primary">Edit</a>
+
+@if (employee.User is not null)
+{
+    <form asp-action="ResetPassword" asp-route-id="@employee.EmployeeId" method="post" class="d-inline" data-confirm="Reset @employee.FullName's password? Their current password stops working immediately and a new one-time password is generated.">
+        <button type="submit" class="btn btn-outline-secondary">Reset Password</button>
+    </form>
+}
+
+@if (employee.FaceTemplateRef is not null)
+{
+    <form asp-action="ResetFaceRegistration" asp-route-id="@employee.EmployeeId" method="post" class="d-inline" data-confirm="Reset @employee.FullName's registered face? Their existing biometric data will be permanently removed and they will need to register their face again before they can check in or out.">
+        <button type="submit" class="btn btn-outline-warning">Reset Face Registration</button>
+    </form>
+}
+
+@if (employee.EmploymentStatus == EmploymentStatus.Active)
+{
+    <form asp-action="Deactivate" asp-route-id="@employee.EmployeeId" method="post" class="d-inline" data-confirm="Deactivate this employee and disable their login? Their attendance/schedule history is kept.">
+        <button type="submit" class="btn btn-outline-danger">Deactivate</button>
+    </form>
+}
+else
+{
+    <form asp-action="Reactivate" asp-route-id="@employee.EmployeeId" method="post" class="d-inline">
+        <button type="submit" class="btn btn-outline-success">Reactivate</button>
+    </form>
+}
+
+
+<a asp-action="Index" class="btn btn-link">Back to list</a>

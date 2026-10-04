@@ -1,0 +1,65 @@
+@model List<LeaveApplication>
+@{
+    ViewData["Title"] = "Review Leave Applications";
+}
+
+<h2>Review Leave Applications</h2>
+
+<div class="card">
+    <div class="card-body">
+        @if (Model.Count == 0)
+        {
+            <partial name="_EmptyState" model="@("No leave applications to review.")" />
+        }
+        else
+        {
+        <div class="table-responsive">
+            <table class="table table-striped mb-0">
+                <thead>
+                    <tr><th>Employee</th><th>Type</th><th>Start</th><th>End</th><th>Reason</th><th>Status</th><th>Reviewed By</th><th>Remarks</th><th>Document</th><th></th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var l in Model)
+                    {
+                        <tr>
+                            <td>@l.Employee.FullName</td>
+                            <td>@l.LeaveType</td>
+                            <td>@l.StartDate</td>
+                            <td>@l.EndDate</td>
+                            <td>@l.Reason</td>
+                            <td><partial name="_StatusBadge" model="l.Status.ToBadge()" /></td>
+                            <td>@(l.ReviewedByUser?.Username ?? "-")</td>
+                            <td>@l.ReviewRemarks</td>
+                            <td>
+                                @if (l.AttachmentStoredFileName is not null)
+                                {
+                                    <a asp-action="Attachment" asp-route-id="@l.LeaveApplicationId" target="_blank" class="btn btn-sm btn-outline-secondary">View Attachment</a>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">&mdash;</span>
+                                }
+                            </td>
+                            <td>
+                                @if (l.Status == LeaveStatus.Pending)
+                                {
+                                    <form asp-action="Approve" method="post" class="mb-1" data-confirm="Approve this leave application? This will create OnLeave attendance records for the employee's scheduled days in this range.">
+                                        <input type="hidden" name="id" value="@l.LeaveApplicationId" />
+                                        <input type="text" name="remarks" class="form-control form-control-sm mb-1" placeholder="Remarks (optional)" />
+                                        <button type="submit" class="btn btn-sm btn-outline-success">Approve</button>
+                                    </form>
+                                    <form asp-action="Reject" method="post" data-confirm="Reject this leave application?">
+                                        <input type="hidden" name="id" value="@l.LeaveApplicationId" />
+                                        <input type="text" name="remarks" class="form-control form-control-sm mb-1" placeholder="Remarks (optional)" />
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Reject</button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        }
+    </div>
+</div>

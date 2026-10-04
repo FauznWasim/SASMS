@@ -1,0 +1,77 @@
+@{
+    ViewData["Title"] = "Employee Dashboard";
+    var recentAttendance = (List<Attendance>)ViewBag.RecentAttendance;
+    var upcomingSchedules = (List<Schedule>)ViewBag.UpcomingSchedules;
+    var unreadCount = (int)ViewBag.UnreadNotificationCount;
+    var attendanceStatus = (AttendanceStatusCardViewModel)ViewBag.AttendanceStatus;
+}
+
+<h2>Welcome back, @ViewBag.DisplayName</h2>
+
+@if (unreadCount > 0)
+{
+    <div class="alert notification-unread">
+        You have @unreadCount unread notification@(unreadCount == 1 ? "" : "s").
+        <a asp-controller="Notifications" asp-action="Index">View notifications</a>
+    </div>
+}
+
+<partial name="_TodayAttendanceCard" model="attendanceStatus" />
+
+<div class="row g-3">
+    <div class="col-md-6">
+        <h5>Recent Attendance (last 7 days)</h5>
+        <div class="card">
+            <div class="card-body">
+                @if (recentAttendance.Count == 0)
+                {
+                    <partial name="_EmptyState" model="@("No attendance recorded in the last 7 days.")" />
+                }
+                else
+                {
+                    <table class="table table-sm mb-0">
+                        <thead><tr><th>Date</th><th>Status</th><th>Verification</th></tr></thead>
+                        <tbody>
+                            @foreach (var a in recentAttendance)
+                            {
+                                <tr>
+                                    <td>@a.AttendanceDate</td>
+                                    <td><partial name="_StatusBadge" model="a.AttendanceStatus.ToBadge()" /></td>
+                                    <td><partial name="_StatusBadge" model="a.VerificationStatus.ToBadge()" /></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </div>
+        <a asp-controller="Attendance" asp-action="Index" class="d-inline-block mt-2">View full history</a>
+    </div>
+    <div class="col-md-6">
+        <h5>Upcoming Shifts</h5>
+        <div class="card">
+            <div class="card-body">
+                @if (upcomingSchedules.Count == 0)
+                {
+                    <partial name="_EmptyState" model="@("No upcoming shifts scheduled.")" />
+                }
+                else
+                {
+                    <table class="table table-sm mb-0">
+                        <thead><tr><th>Date</th><th>Time</th></tr></thead>
+                        <tbody>
+                            @foreach (var s in upcomingSchedules)
+                            {
+                                <tr>
+                                    <td>@s.ShiftDate</td>
+                                    <td>@s.StartTime - @s.EndTime</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </div>
+        <a asp-controller="Schedules" asp-action="Index" class="d-inline-block mt-2">View full schedule</a>
+    </div>
+</div>

@@ -1,0 +1,44 @@
+## .NET build output
+bin/
+obj/
+*.user
+
+## IDE
+.vs/
+.vscode/
+
+## Local secrets (contains a local XAMPP MySQL connection string / dev secret)
+src/SASMS.Web/appsettings.Development.json
+
+## Local HTTPS dev certificates (mkcert-generated, LAN-IP-specific, machine-local;
+## never commit private key material)
+src/SASMS.Web/dev-https-cert/
+
+## Leave application supporting documents — uploaded files, not source, stored outside
+## wwwroot (never web-servable) so they're never reachable by guessing a URL
+src/SASMS.Web/App_Data/
+
+## Docker Compose deployment secrets (MySQL app password, shared secrets) — real values
+## live only in a local .env next to docker-compose.yml; .env.example is the committed
+## template. Never commit the real file.
+.env
+
+## Real TLS certificates for the Nginx reverse proxy (see nginx/README.md) — nginx/certs/
+## has its own .gitignore too, this is a repo-root-visible reminder of the same rule.
+nginx/certs/*
+!nginx/certs/.gitignore
+
+## Python face-service virtual environment and bytecode cache — machine-local, rebuilt from
+## face-service/requirements.txt
+face-service/.venv/
+__pycache__/
+*.py[cod]
+
+## Face-service runtime data — the trained recognizer model/labels and registered reference
+## photos are real biometric data, never committed; models/*.task is the one-time-downloaded
+## landmark model asset, not source (see face-service/README.md "Setup")
+face-service/data/
+face-service/models/*.task
+
+## Local UI backup folders made during manual polish passes — not part of the application
+ui-polish-backup-*/

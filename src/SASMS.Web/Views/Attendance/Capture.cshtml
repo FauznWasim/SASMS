@@ -1,0 +1,55 @@
+@{
+    string mode = ViewBag.Mode;
+    var config = mode switch
+    {
+        "checkin" => (
+            Title: "Check In — Face Verification",
+            Instructions: "Look at the camera and blink naturally while we capture a short burst of frames.",
+            Action: Url.Action("CheckIn"),
+            RedirectUrl: Url.Action("Index"),
+            FrameCount: 15,
+            IntervalMs: 150,
+            ButtonLabel: "Start Check-In"),
+        "checkout" => (
+            Title: "Check Out — Face Verification",
+            Instructions: "Look at the camera and blink naturally while we capture a short burst of frames.",
+            Action: Url.Action("CheckOut"),
+            RedirectUrl: Url.Action("Index"),
+            FrameCount: 15,
+            IntervalMs: 150,
+            ButtonLabel: "Start Check-Out"),
+        _ => (
+            Title: "Register Your Face",
+            Instructions: "Look directly at the camera. We'll capture a few reference photos to recognize you by.",
+            Action: Url.Action("RegisterFace"),
+            RedirectUrl: Url.Action("Index", "Home"),
+            FrameCount: 5,
+            IntervalMs: 300,
+            ButtonLabel: "Start Registration")
+    };
+    ViewData["Title"] = config.Title;
+}
+
+<h2>@config.Title</h2>
+<p class="text-muted">@config.Instructions</p>
+
+<div class="card" style="max-width: 480px;">
+    <div class="card-body text-center">
+        <div id="face-capture-root"
+             data-target-action="@config.Action"
+             data-redirect-url="@config.RedirectUrl"
+             data-frame-count="@config.FrameCount"
+             data-interval-ms="@config.IntervalMs">
+            <video id="preview" autoplay muted playsinline class="w-100 rounded mb-3" style="background:#000; aspect-ratio: 4/3;"></video>
+            <canvas id="canvas" style="display:none"></canvas>
+            <button id="startBtn" type="button" class="btn btn-primary w-100">@config.ButtonLabel</button>
+            <div id="statusText" class="mt-2 text-muted small"></div>
+        </div>
+    </div>
+</div>
+
+<a asp-controller="Home" asp-action="Index" class="btn btn-link mt-3">Cancel</a>
+
+@section Scripts {
+    <script src="~/js/face-capture.js" asp-append-version="true"></script>
+}

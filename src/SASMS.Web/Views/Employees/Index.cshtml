@@ -1,0 +1,48 @@
+@model List<Employee>
+@{
+    ViewData["Title"] = "Employees";
+}
+
+<h2>Employees</h2>
+<p><a asp-action="Create" class="btn btn-primary">+ New Employee</a></p>
+
+<div class="card">
+    <div class="card-body">
+        @if (Model.Count == 0)
+        {
+            <partial name="_EmptyState" model="@("No employees yet.")" />
+        }
+        else
+        {
+        <div class="table-responsive">
+            <table class="table table-striped mb-0">
+                <thead>
+                    <tr>
+                        <th>Full Name</th>
+                        <th>Email</th>
+                        <th>Position</th>
+                        <th>Department</th>
+                        <th>Account</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var e in Model)
+                    {
+                        <tr>
+                            <td>@e.FullName</td>
+                            <td>@e.Email</td>
+                            <td>@e.Position</td>
+                            <td>@e.Department</td>
+                            <td>@(e.User?.Username ?? "-")</td>
+                            <td><partial name="_StatusBadge" model="e.EmploymentStatus.ToBadge()" /></td>
+                            <td><a asp-action="Details" asp-route-id="@e.EmployeeId" class="btn btn-sm btn-outline-primary">Details</a></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        }
+    </div>
+</div>

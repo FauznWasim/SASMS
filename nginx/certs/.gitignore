@@ -1,0 +1,5 @@
+# Real TLS certificates/keys go here at deploy time — never commit them. This file keeps
+# the empty directory itself in git (so the bind mount in docker-compose.yml has somewhere
+# to attach to in a fresh checkout) without tracking its contents.
+*
+!.gitignore

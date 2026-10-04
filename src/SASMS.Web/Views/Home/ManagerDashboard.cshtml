@@ -1,0 +1,151 @@
+@{
+    ViewData["Title"] = "Manager Dashboard";
+    var todayAttendance = (List<Attendance>)ViewBag.TodayAttendance;
+    var upcomingSchedules = (List<Schedule>)ViewBag.UpcomingSchedules;
+    var attendanceStatus = (AttendanceStatusCardViewModel)ViewBag.AttendanceStatus;
+    var workHours = (WorkHoursOverviewViewModel)ViewBag.WorkHoursOverview;
+}
+
+<h2>Welcome back, @ViewBag.DisplayName</h2>
+<p class="text-muted mt-n2 mb-3">Manager/PIC Dashboard</p>
+
+<h5>Your Own Attendance</h5>
+<partial name="_TodayAttendanceCard" model="attendanceStatus" />
+
+<h5>Store Overview — Today</h5>
+<div class="row row-cols-2 row-cols-sm-3 row-cols-lg-5 g-3 mb-4">
+    <div class="col">
+        <div class="stat-tile">
+            <span class="stat-tile__icon stat-tile__icon--brand">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 3" /></svg>
+            </span>
+            <div>
+                <div class="stat-tile__value">@todayAttendance.Count</div>
+                <div class="stat-tile__label">Checked in today</div>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="stat-tile">
+            <span class="stat-tile__icon stat-tile__icon--warning">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12M6 21h12M6 3l6 9-6 9M18 3l-6 9 6 9" /></svg>
+            </span>
+            <div>
+                <div class="stat-tile__value">@todayAttendance.Count(a => a.VerificationStatus == VerificationStatus.Pending)</div>
+                <div class="stat-tile__label">Pending verification</div>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="stat-tile">
+            <span class="stat-tile__icon stat-tile__icon--good">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M8 12l3 3 5-6" /></svg>
+            </span>
+            <div>
+                <div class="stat-tile__value">@todayAttendance.Count(a => a.VerificationStatus == VerificationStatus.Verified)</div>
+                <div class="stat-tile__label">Verified</div>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="stat-tile">
+            <span class="stat-tile__icon stat-tile__icon--warning">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l10 18H2L12 3z" /><path d="M12 10v4" /><circle cx="12" cy="17" r="0.5" fill="currentColor" /></svg>
+            </span>
+            <div>
+                <div class="stat-tile__value">@todayAttendance.Count(a => a.AttendanceStatus == AttendanceStatus.Late)</div>
+                <div class="stat-tile__label">Late</div>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="stat-tile" title="Leave applications awaiting review">
+            <span class="stat-tile__icon stat-tile__icon--warning">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" /></svg>
+            </span>
+            <div>
+                <div class="stat-tile__value">@ViewBag.PendingLeaveCount</div>
+                <div class="stat-tile__label">Pending Leave</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<p>
+    <a asp-controller="Attendance" asp-action="All" class="btn btn-primary btn-sm">Review Today's Attendance</a>
+    <a asp-controller="Leave" asp-action="Review" class="btn btn-outline-secondary btn-sm">Review Leave Applications</a>
+    <a asp-controller="Employees" asp-action="Index" class="btn btn-outline-secondary btn-sm">Manage Employees</a>
+    <a asp-controller="Schedules" asp-action="Create" class="btn btn-outline-secondary btn-sm">Create Schedule</a>
+    <a asp-controller="Reports" asp-action="Index" class="btn btn-outline-secondary btn-sm">Reports</a>
+</p>
+
+<div id="work-hours-overview-container">
+    <partial name="_WorkHoursOverview" model="workHours" />
+</div>
+
+<h5>Upcoming Shifts (next 7 days)</h5>
+<div class="card">
+    <div class="card-body">
+        @if (upcomingSchedules.Count == 0)
+        {
+            <partial name="_EmptyState" model="@("No shifts scheduled in the next 7 days.")" />
+        }
+        else
+        {
+            <table class="table table-sm mb-0">
+                <thead><tr><th>Employee</th><th>Date</th><th>Time</th></tr></thead>
+                <tbody>
+                    @foreach (var s in upcomingSchedules)
+                    {
+                        <tr>
+                            <td>@s.Employee.FullName</td>
+                            <td>@s.ShiftDate</td>
+                            <td>@s.StartTime - @s.EndTime</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Work Hours Overview period switch: fetch just that section's HTML and replace it
+        // in place — no full-page navigation happens at all, so there's nothing for scroll
+        // position to recover from. The links still carry a working href (full-page
+        // ?period=... reload) as a no-JS fallback; this only intercepts the click when JS is
+        // available.
+        (function () {
+            var container = document.getElementById('work-hours-overview-container');
+            if (!container) { return; }
+
+            function attachPeriodLinkHandlers() {
+                container.querySelectorAll('.work-hours-period-link').forEach(function (link) {
+                    link.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        loadPeriod(link.getAttribute('data-period'));
+                    });
+                });
+            }
+
+            function loadPeriod(period) {
+                fetch('@Url.Action("WorkHoursOverviewPartial", "Home")?period=' + encodeURIComponent(period))
+                    .then(function (response) {
+                        if (!response.ok) { throw new Error('Request failed'); }
+                        return response.text();
+                    })
+                    .then(function (html) {
+                        container.innerHTML = html;
+                        attachPeriodLinkHandlers();
+                    })
+                    .catch(function () {
+                        // AJAX failed for any reason — fall back to the normal full-page reload.
+                        window.location.href = '@Url.Action("ManagerDashboard", "Home")?period=' + encodeURIComponent(period);
+                    });
+            }
+
+            attachPeriodLinkHandlers();
+        })();
+    </script>
+}

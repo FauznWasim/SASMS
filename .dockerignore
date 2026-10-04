@@ -1,0 +1,28 @@
+# Applies to both Dockerfiles (src/SASMS.Web/Dockerfile and face-service/Dockerfile), since
+# both use the repo root as their build context.
+
+# .NET build output — rebuilt fresh inside the image, never copied in from the host.
+**/bin/
+**/obj/
+**/*.user
+
+# Real biometric data and downloaded model — must only ever reach a container via the
+# face-data/face-models volumes in docker-compose.yml, never baked into the image.
+face-service/data/
+face-service/models/
+face-service/.venv/
+**/__pycache__/
+**/*.pyc
+
+# Local secrets / machine-local dev config — never belongs in any image.
+src/SASMS.Web/appsettings.Development.json
+src/SASMS.Web/dev-https-cert/
+src/SASMS.Web/App_Data/
+.env
+
+# Editor/VCS/misc — irrelevant to the image, just wasted build-context upload time.
+.git/
+.vs/
+.vscode/
+ui-polish-backup-*/
+*.md

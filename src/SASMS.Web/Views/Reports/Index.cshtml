@@ -1,0 +1,44 @@
+@{
+    ViewData["Title"] = "Reports";
+}
+
+<h2>Attendance Reports</h2>
+
+<div class="row g-3">
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Monthly Attendance</h5>
+                <p class="card-text text-muted">Summary of present/late/absent/on-leave days per employee for a given month.</p>
+                <a asp-action="Monthly" class="btn btn-outline-primary btn-sm">View</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Late Attendance</h5>
+                <p class="card-text text-muted">Employees who checked in after their scheduled shift start.</p>
+                <a asp-action="Late" class="btn btn-outline-primary btn-sm">View</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Absence</h5>
+                <p class="card-text text-muted">Employees marked absent within a date range.</p>
+                <a asp-action="Absence" class="btn btn-outline-primary btn-sm">View</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Overtime</h5>
+                <p class="card-text text-muted">Verified attendance exceeding 8 hours worked in a day.</p>
+                <a asp-action="Overtime" class="btn btn-outline-primary btn-sm">View</a>
+            </div>
+        </div>
+    </div>
+</div>

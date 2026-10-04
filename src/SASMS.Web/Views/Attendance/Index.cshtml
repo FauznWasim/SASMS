@@ -1,0 +1,40 @@
+@model List<Attendance>
+@inject SASMS.Web.Security.IBusinessClock BusinessClock
+@{
+    ViewData["Title"] = "My Attendance";
+}
+
+<h2>My Attendance History</h2>
+
+<div class="card">
+    <div class="card-body">
+        @if (Model.Count == 0)
+        {
+            <partial name="_EmptyState" model="@("No attendance history yet.")" />
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-striped mb-0">
+                    <thead>
+                        <tr><th>Date</th><th>Check In</th><th>Check Out</th><th>Status</th><th>Verification</th></tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var a in Model)
+                        {
+                            <tr>
+                                <td>@a.AttendanceDate</td>
+                                <td>@(a.CheckInTime is not null ? BusinessClock.ToMalaysiaTime(a.CheckInTime.Value).ToString() : "")</td>
+                                <td>@(a.CheckOutTime is not null ? BusinessClock.ToMalaysiaTime(a.CheckOutTime.Value).ToString() : "")</td>
+                                <td><partial name="_StatusBadge" model="a.AttendanceStatus.ToBadge()" /></td>
+                                <td><partial name="_StatusBadge" model="a.VerificationStatus.ToBadge()" /></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
+
+<a asp-controller="Home" asp-action="Index" class="btn btn-link mt-3">Back to Dashboard</a>

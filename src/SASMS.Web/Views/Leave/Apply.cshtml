@@ -1,0 +1,62 @@
+@model LeaveApplyViewModel
+@{
+    ViewData["Title"] = "Apply for Leave";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8 col-xl-7">
+        <div class="card">
+            <div class="card-body p-4 p-md-5">
+                <h2 class="text-center mb-4">Apply for Leave</h2>
+
+                <form asp-action="Apply" method="post" enctype="multipart/form-data">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="mb-4">
+                        <label asp-for="LeaveType" class="form-label"></label>
+                        <select asp-for="LeaveType" class="form-select" asp-items="Html.GetEnumSelectList<LeaveType>()">
+                            <option value="">-- Select Leave Type --</option>
+                        </select>
+                        <span asp-validation-for="LeaveType" class="text-danger"></span>
+                    </div>
+
+                    <h6 class="text-muted mb-2">Leave Period</h6>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label asp-for="StartDate" class="form-label"></label>
+                            <input asp-for="StartDate" class="form-control" />
+                            <span asp-validation-for="StartDate" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="EndDate" class="form-label"></label>
+                            <input asp-for="EndDate" class="form-control" />
+                            <span asp-validation-for="EndDate" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Reason" class="form-label"></label>
+                        <textarea asp-for="Reason" class="form-control" rows="4"></textarea>
+                        <span asp-validation-for="Reason" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="SupportingDocument" class="form-label"></label>
+                        <input asp-for="SupportingDocument" type="file" class="form-control" accept=".jpg,.jpeg,.pdf" />
+                        <span asp-validation-for="SupportingDocument" class="text-danger"></span>
+                        <div class="form-text">JPG / JPEG / PDF &middot; Maximum 500 KB</div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a asp-action="Index" class="btn btn-link">Cancel</a>
+                        <button type="submit" class="btn btn-primary">Submit Application</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

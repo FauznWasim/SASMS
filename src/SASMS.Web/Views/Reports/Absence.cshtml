@@ -1,0 +1,39 @@
+@model List<AbsenceRow>
+@{
+    ViewData["Title"] = "Absence Report";
+    DateOnly from = ViewBag.From;
+    DateOnly to = ViewBag.To;
+}
+
+<h2>Absence Report</h2>
+
+<div class="card">
+    <div class="card-body">
+        <form method="get" class="row g-2 mb-3">
+            <div class="col-auto"><input type="date" name="from" class="form-control" value="@from.ToString("yyyy-MM-dd")" /></div>
+            <div class="col-auto"><input type="date" name="to" class="form-control" value="@to.ToString("yyyy-MM-dd")" /></div>
+            <div class="col-auto"><button type="submit" class="btn btn-outline-primary">View</button></div>
+            <div class="col-auto"><a class="btn btn-outline-secondary" asp-action="AbsenceExport" asp-route-from="@from" asp-route-to="@to">Export CSV</a></div>
+        </form>
+
+        @if (Model.Count == 0)
+        {
+            <partial name="_EmptyState" model="@("No absences recorded for this date range.")" />
+        }
+        else
+        {
+        <table class="table table-striped mb-0">
+            <thead><tr><th>Employee</th><th>Date</th></tr></thead>
+            <tbody>
+                @foreach (var r in Model)
+                {
+                    <tr>
+                        <td>@r.EmployeeName</td>
+                        <td>@r.AttendanceDate</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        }
+    </div>
+</div>

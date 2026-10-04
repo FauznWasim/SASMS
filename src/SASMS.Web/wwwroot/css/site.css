@@ -1,0 +1,505 @@
+/* ===== SASMS design tokens (Subway-brand palette) ===== */
+:root {
+  /* Brand */
+  --brand-green-dark: #00543c;
+  --brand-green: #0f8a5f;
+  --brand-green-darker: #00392a;
+  --brand-yellow: #ffc600;
+
+  /* Status palette (validated colorblind-safe steps) */
+  --status-good: #0ca30c;
+  --status-good-tint: #e6f7e6;
+  --status-good-text: #006300;
+
+  --status-warning: #fab219;
+  --status-warning-tint: #fff3d6;
+  --status-warning-text: #8a5a00;
+
+  --status-serious: #ec835a;
+  --status-serious-tint: #fde7de;
+  --status-serious-text: #a8431b;
+
+  --status-critical: #d03b3b;
+  --status-critical-tint: #fbe4e4;
+  --status-critical-text: #a11f1f;
+
+  --status-neutral: #898781;
+  --status-neutral-tint: #ececeb;
+  --status-neutral-text: #52514e;
+
+  /* Bootstrap theme overrides — cascades into btn/badge/text/border/bg utilities */
+  --bs-primary: var(--brand-green-dark);
+  --bs-primary-rgb: 0, 84, 60;
+  --bs-primary-bg-subtle: #d6e8e1;
+  --bs-primary-border-subtle: #a8cfc0;
+  --bs-primary-text-emphasis: var(--brand-green-darker);
+
+  --bs-success: var(--status-good);
+  --bs-success-rgb: 12, 163, 12;
+  --bs-success-bg-subtle: var(--status-good-tint);
+  --bs-success-border-subtle: #b7e3b7;
+  --bs-success-text-emphasis: var(--status-good-text);
+
+  --bs-warning: var(--status-warning);
+  --bs-warning-rgb: 250, 178, 25;
+  --bs-warning-bg-subtle: var(--status-warning-tint);
+  --bs-warning-border-subtle: #ffe1a3;
+  --bs-warning-text-emphasis: var(--status-warning-text);
+
+  --bs-danger: var(--status-critical);
+  --bs-danger-rgb: 208, 59, 59;
+  --bs-danger-bg-subtle: var(--status-critical-tint);
+  --bs-danger-border-subtle: #f3bcbc;
+  --bs-danger-text-emphasis: var(--status-critical-text);
+
+  --bs-info: var(--status-serious);
+  --bs-info-rgb: 236, 131, 90;
+  --bs-info-bg-subtle: var(--status-serious-tint);
+  --bs-info-border-subtle: #f7c4ac;
+  --bs-info-text-emphasis: var(--status-serious-text);
+
+  --bs-body-bg: #f9f9f7;
+  --bs-body-color: #14140f;
+  --bs-link-color: var(--brand-green-dark);
+  --bs-link-hover-color: var(--brand-green);
+  --bs-border-radius: 0.6rem;
+  --bs-border-radius-sm: 0.4rem;
+  --bs-border-radius-lg: 0.9rem;
+}
+
+/* Buttons: Bootstrap bakes hover/active shades as static fallbacks, so the
+   component-scoped vars need an explicit override, not just the root color. */
+.btn-primary {
+  --bs-btn-bg: var(--brand-green-dark);
+  --bs-btn-border-color: var(--brand-green-dark);
+  --bs-btn-hover-bg: var(--brand-green);
+  --bs-btn-hover-border-color: var(--brand-green);
+  --bs-btn-active-bg: var(--brand-green-darker);
+  --bs-btn-active-border-color: var(--brand-green-darker);
+  --bs-btn-disabled-bg: var(--brand-green-dark);
+  --bs-btn-disabled-border-color: var(--brand-green-dark);
+  --bs-btn-focus-shadow-rgb: 0, 84, 60;
+  box-shadow: 0 2px 6px rgba(0, 84, 60, 0.25);
+}
+.btn {
+  transition: transform 0.1s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0, 84, 60, 0.3);
+}
+.btn-outline-primary {
+  --bs-btn-color: var(--brand-green-dark);
+  --bs-btn-border-color: var(--brand-green-dark);
+  --bs-btn-hover-bg: var(--brand-green-dark);
+  --bs-btn-hover-border-color: var(--brand-green-dark);
+  --bs-btn-active-bg: var(--brand-green-darker);
+  --bs-btn-active-border-color: var(--brand-green-darker);
+  --bs-btn-focus-shadow-rgb: 0, 84, 60;
+}
+
+/* ===== Typography ===== */
+:root {
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+body {
+  font-family: var(--font-sans);
+}
+h1, h2, h3, h4, h5, h6,
+.navbar-brand, .btn, .stat-tile__value {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+h5 {
+  font-size: 1.05rem;
+  color: var(--brand-green-darker);
+  margin-top: 1.75rem;
+  margin-bottom: 0.85rem;
+}
+h5:first-child {
+  margin-top: 0;
+}
+
+html {
+  font-size: 15px;
+  position: relative;
+  min-height: 100%;
+  /* html is the actual document-scrolling element per spec, so clipping overflow here is
+     enough on its own to stop the page/navbar moving horizontally — confirmed needed on
+     real iPhone Safari (not reproduced in desktop emulation), see site.css history.
+     Deliberately NOT also set on body (see below). */
+  overflow-x: hidden;
+}
+
+body {
+  /* Standard flex-column sticky footer: body is the outer column (header / main / footer
+     as its three items), .site-main grows to absorb any unused vertical space so the
+     footer sits right after content on long pages and gets pushed to the true bottom of
+     the viewport on short pages — no position:absolute/fixed, no magic-number heights.
+     NOTE: overflow-x: hidden was tried here too (not just on html), but real-device
+     testing on iPhone Safari showed it breaks WebKit's touch-scroll gesture dispatch to
+     nested overflow-x:auto regions (Bootstrap's .table-responsive) — the table became
+     stuck, unable to reach its right-hand columns. html's own overflow-x: hidden already
+     fully contains the document, so body must NOT have its own copy of that rule. */
+  display: flex;
+  flex-direction: column;
+  /* min-height: 100% (a percentage) only resolves against a containing block with a
+     DEFINITE height — html only sets min-height: 100% on itself too, never an explicit
+     height, so html's own height stays "auto" (content-based) for percentage-resolution
+     purposes, and body's min-height: 100% had nothing definite to resolve against. That's
+     why body stayed only as tall as its content on real iPhone Safari instead of filling
+     the viewport, leaving the footer stranded right after the content with empty space
+     below it. Viewport units sidestep the whole chain — they resolve directly against the
+     actual viewport, independent of any ancestor's height. 100vh first as a universally-
+     supported fallback; 100dvh (dynamic viewport height, iOS Safari 15.4+) overrides it on
+     browsers that support it, additionally accounting for Safari's address bar showing/
+     hiding so the footer lands at the true visible bottom rather than the taller
+     chrome-included 100vh. */
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.site-main {
+  /* flex: 1 0 auto lets this grow to fill leftover height; min-width: 0 is the standard
+     fix for a flex item that contains a horizontally-scrollable descendant (.table-
+     responsive) — without it, a flex item's default min-width:auto can refuse to shrink
+     to the viewport width when its content wants to be wider, which would reintroduce
+     page-level horizontal overflow around the very table we already fixed. */
+  flex: 1 0 auto;
+  min-width: 0;
+}
+
+.footer {
+  /* Normal document flow at every width — no absolute/fixed positioning, no fixed
+     line-height assuming a single line, text wraps naturally if it doesn't fit. */
+  border-top-color: var(--brand-yellow) !important;
+  border-top-width: 3px !important;
+  padding: 0.75rem 0;
+  line-height: 1.4;
+}
+
+/* ===== Navbar ===== */
+.navbar-sasms {
+  background-color: var(--brand-green-dark);
+  border-bottom: 3px solid var(--brand-yellow);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
+}
+.navbar-sasms .navbar-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #fff;
+}
+.navbar-sasms .nav-link {
+  color: rgba(255, 255, 255, 0.85) !important;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+.navbar-sasms .nav-link:hover,
+.navbar-sasms .nav-link.active {
+  color: #fff !important;
+  border-bottom-color: var(--brand-yellow);
+}
+
+/* ===== Small icon button (navbar notification bell, etc.) ===== */
+.icon-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  color: rgba(255, 255, 255, 0.85);
+  background: transparent;
+  border: none;
+  text-decoration: none;
+}
+.icon-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+.icon-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 3px;
+  border-radius: 999px;
+  background: var(--status-critical);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+/* ===== Status badge (used instead of ad-hoc bg-* ternaries) ===== */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+}
+.status-badge::before {
+  content: "";
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  flex: none;
+}
+.status-badge--good {
+  background-color: var(--status-good-tint);
+  color: var(--status-good-text);
+}
+.status-badge--good::before {
+  background-color: var(--status-good);
+}
+.status-badge--warning {
+  background-color: var(--status-warning-tint);
+  color: var(--status-warning-text);
+}
+.status-badge--warning::before {
+  background-color: var(--status-warning);
+}
+.status-badge--serious {
+  background-color: var(--status-serious-tint);
+  color: var(--status-serious-text);
+}
+.status-badge--serious::before {
+  background-color: var(--status-serious);
+}
+.status-badge--critical {
+  background-color: var(--status-critical-tint);
+  color: var(--status-critical-text);
+}
+.status-badge--critical::before {
+  background-color: var(--status-critical);
+}
+.status-badge--neutral {
+  background-color: var(--status-neutral-tint);
+  color: var(--status-neutral-text);
+}
+.status-badge--neutral::before {
+  background-color: var(--status-neutral);
+}
+
+/* ===== Stat tiles (dashboard KPIs) ===== */
+.stat-tile {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  background: #fff;
+  border: 1px solid rgba(11, 11, 11, 0.06);
+  border-radius: var(--bs-border-radius-lg);
+  padding: 1rem 1.1rem;
+  height: 100%;
+  box-shadow: 0 1px 2px rgba(11, 11, 11, 0.04), 0 6px 16px rgba(11, 11, 11, 0.05);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.stat-tile:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 4px rgba(11, 11, 11, 0.06), 0 10px 24px rgba(11, 11, 11, 0.08);
+}
+.stat-tile__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 50%;
+  flex: none;
+  font-size: 1.25rem;
+}
+.stat-tile__icon--good {
+  background-color: var(--status-good-tint);
+  color: var(--status-good-text);
+}
+.stat-tile__icon--warning {
+  background-color: var(--status-warning-tint);
+  color: var(--status-warning-text);
+}
+.stat-tile__icon--serious {
+  background-color: var(--status-serious-tint);
+  color: var(--status-serious-text);
+}
+.stat-tile__icon--critical {
+  background-color: var(--status-critical-tint);
+  color: var(--status-critical-text);
+}
+.stat-tile__icon--brand {
+  background-color: var(--bs-primary-bg-subtle);
+  color: var(--brand-green-darker);
+}
+.stat-tile__value {
+  font-size: 1.75rem;
+  font-weight: 600;
+  line-height: 1.1;
+}
+.stat-tile__label {
+  color: var(--status-neutral-text);
+  font-size: 0.85rem;
+}
+
+/* ===== Work hours chart (Manager Dashboard) — pure CSS, no charting library ===== */
+.hours-chart__row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+.hours-chart__label {
+  flex: 0 0 5.5rem;
+  font-size: 0.85rem;
+  color: var(--status-neutral-text);
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hours-chart__track {
+  flex: 1 1 auto;
+  display: flex;
+  background-color: var(--status-neutral-tint);
+  border-radius: var(--bs-border-radius-sm);
+  height: 1.1rem;
+  overflow: hidden;
+}
+.hours-chart__bar--regular {
+  background-color: var(--brand-green-dark);
+}
+.hours-chart__bar--overtime {
+  background-color: var(--status-warning);
+}
+.hours-chart__value {
+  flex: 0 0 3.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.hours-chart__legend-swatch {
+  display: inline-block;
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 2px;
+  margin-right: 0.25rem;
+}
+.hours-chart__legend-swatch--regular {
+  background-color: var(--brand-green-dark);
+}
+.hours-chart__legend-swatch--overtime {
+  background-color: var(--status-warning);
+}
+
+/* ===== Cards & tables (general polish) ===== */
+.card {
+  border-color: rgba(11, 11, 11, 0.06);
+  box-shadow: 0 1px 2px rgba(11, 11, 11, 0.04), 0 6px 16px rgba(11, 11, 11, 0.05);
+}
+.card-title {
+  font-weight: 700;
+}
+.table > :not(caption) > * > * {
+  vertical-align: middle;
+}
+.table thead th {
+  color: var(--status-neutral-text);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom-width: 1px;
+}
+.table > tbody > tr {
+  transition: background-color 0.1s ease;
+}
+.table > tbody > tr:hover > * {
+  background-color: var(--bs-primary-bg-subtle);
+}
+
+/* ===== Login page ===== */
+body.login-page {
+  background: linear-gradient(180deg, #e8f4ee 0%, #f9f9f7 320px);
+  min-height: 100vh;
+}
+.login-card {
+  max-width: 420px;
+  margin: 4.5rem auto;
+  background: #fff;
+  border-radius: var(--bs-border-radius-lg);
+  box-shadow: 0 1rem 2.5rem rgba(11, 11, 11, 0.12);
+  padding: 2.5rem 2.25rem;
+  text-align: center;
+}
+.login-card__logo {
+  height: 80px;
+  width: auto;
+  margin-bottom: 1rem;
+}
+.login-card__title {
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+.login-card__subtitle {
+  color: var(--status-neutral-text);
+  margin-bottom: 1.75rem;
+}
+.login-card .form-control {
+  background-color: var(--bs-primary-bg-subtle);
+  border-color: transparent;
+}
+.login-card .form-control:focus {
+  background-color: #fff;
+  border-color: var(--brand-green);
+}
+.login-card .password-toggle-btn {
+  background-color: var(--bs-primary-bg-subtle);
+  border-color: transparent;
+  color: var(--status-neutral-text);
+}
+.login-card .input-group:focus-within .form-control,
+.login-card .input-group:focus-within .password-toggle-btn {
+  background-color: #fff;
+  border-color: var(--brand-green);
+}
+
+/* ===== Password show/hide toggle ===== */
+.password-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ===== Empty states ===== */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2.75rem 1rem;
+  color: var(--status-neutral-text);
+  text-align: center;
+}
+.empty-state svg {
+  margin-bottom: 0.75rem;
+  opacity: 0.45;
+}
+.empty-state p {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+/* ===== Notifications ===== */
+.notification-unread {
+  background-color: var(--status-warning-tint) !important;
+  border-color: var(--status-warning) !important;
+}

@@ -1,0 +1,81 @@
+@model AttendanceStatusCardViewModel
+@inject SASMS.Web.Security.IBusinessClock BusinessClock
+
+@if (!Model.FaceRegistered)
+{
+    <div class="alert alert-warning">
+        Your face isn't registered yet — you'll need to before you can check in or out.
+        <a asp-controller="Attendance" asp-action="Capture" asp-route-mode="register">Register now</a>
+    </div>
+}
+
+<div class="card mb-4">
+    <div class="card-body">
+        <h5 class="card-title">Today's Attendance</h5>
+        @if (Model.TodayRecord is null)
+        {
+            @if (!Model.HasScheduleToday)
+            {
+                <p class="text-muted mb-0">You are not scheduled to work today.</p>
+            }
+            else
+            {
+                <p>You have not checked in today.</p>
+                @if (Model.FaceRegistered)
+                {
+                    <a asp-controller="Attendance" asp-action="Capture" asp-route-mode="checkin" class="btn btn-primary">Check In</a>
+                }
+                else
+                {
+                    <button type="button" class="btn btn-primary" disabled title="Register your face first">Check In</button>
+                }
+            }
+        }
+        else
+        {
+            <dl class="row mb-0">
+                <dt class="col-sm-3">Check-in</dt>
+                <dd class="col-sm-9">@(Model.TodayRecord.CheckInTime is not null ? BusinessClock.ToMalaysiaTime(Model.TodayRecord.CheckInTime.Value).ToString() : "")</dd>
+                <dt class="col-sm-3">Check-out</dt>
+                <dd class="col-sm-9">@(Model.TodayRecord.CheckOutTime is not null
+                    ? BusinessClock.ToMalaysiaTime(Model.TodayRecord.CheckOutTime.Value).ToString()
+                    : Model.TodayRecord.VerificationStatus == VerificationStatus.NotApplicable ? "" : "Not checked out yet")</dd>
+                <dt class="col-sm-3">Verification</dt>
+                <dd class="col-sm-9">
+                    <partial name="_StatusBadge" model="Model.TodayRecord.VerificationStatus.ToBadge()" />
+                    @if (Model.TodayRecord.VerificationStatus == VerificationStatus.Pending)
+                    {
+                        <small class="text-muted d-block mt-1">Still processing — a Manager/PIC can also use the manual override if needed.</small>
+                    }
+                    else if (Model.TodayRecord.VerificationStatus == VerificationStatus.Failed)
+                    {
+                        <small class="text-danger d-block mt-1">Check-in wasn't verified — you can't check out until a Manager/PIC reviews it.</small>
+                    }
+                    else if (Model.TodayRecord.VerificationStatus == VerificationStatus.NotApplicable && Model.TodayRecord.AttendanceStatus == AttendanceStatus.OnLeave)
+                    {
+                        <small class="text-muted d-block mt-1">You are on approved leave today — attendance check-in is not required.</small>
+                    }
+                    else if (Model.TodayRecord.VerificationStatus == VerificationStatus.NotApplicable)
+                    {
+                        <small class="text-muted d-block mt-1">You were marked absent by management today — facial verification does not apply.</small>
+                    }
+                </dd>
+            </dl>
+            @if (Model.TodayRecord.CheckOutTime is null && Model.TodayRecord.VerificationStatus != VerificationStatus.NotApplicable)
+            {
+                @if (Model.TodayRecord.VerificationStatus == VerificationStatus.Verified && Model.FaceRegistered)
+                {
+                    <a asp-controller="Attendance" asp-action="Capture" asp-route-mode="checkout" class="btn btn-outline-secondary mt-2">Check Out</a>
+                }
+                else if (Model.TodayRecord.VerificationStatus == VerificationStatus.Verified && !Model.FaceRegistered)
+                {
+                    <button type="button" class="btn btn-outline-secondary mt-2" disabled title="Register your face first">Check Out</button>
+                }
+                else
+                {
+                    <button type="button" class="btn btn-outline-secondary mt-2" disabled title="Check-in must be verified first">Check Out</button>
+                }
+            }
+        }
+    </div>
+</div>

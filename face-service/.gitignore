@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+*.pyc
+data/
+
+## Downloaded local landmark model asset (see README — one-time download, not source)
+models/

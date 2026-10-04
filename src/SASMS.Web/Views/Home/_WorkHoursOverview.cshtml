@@ -1,0 +1,83 @@
+@model WorkHoursOverviewViewModel
+
+<h5>Work Hours Overview</h5>
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="btn-group mb-3" role="group" aria-label="Work hours period">
+            <a asp-action="ManagerDashboard" asp-route-period="today" data-period="today" class="btn btn-sm work-hours-period-link @(Model.Period == "today" ? "btn-primary" : "btn-outline-secondary")">Today</a>
+            <a asp-action="ManagerDashboard" asp-route-period="week" data-period="week" class="btn btn-sm work-hours-period-link @(Model.Period == "week" ? "btn-primary" : "btn-outline-secondary")">This Week</a>
+            <a asp-action="ManagerDashboard" asp-route-period="month" data-period="month" class="btn btn-sm work-hours-period-link @(Model.Period == "month" ? "btn-primary" : "btn-outline-secondary")">This Month</a>
+        </div>
+
+        <div class="row row-cols-1 row-cols-sm-3 g-3 mb-3">
+            <div class="col">
+                <div class="stat-tile">
+                    <span class="stat-tile__icon stat-tile__icon--brand">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 3" /></svg>
+                    </span>
+                    <div>
+                        <div class="stat-tile__value">@Model.TotalWorkedHours.ToString("0.#")h</div>
+                        <div class="stat-tile__label">Total Worked Hours</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="stat-tile">
+                    <span class="stat-tile__icon stat-tile__icon--warning">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l10 18H2L12 3z" /><path d="M12 10v4" /><circle cx="12" cy="17" r="0.5" fill="currentColor" /></svg>
+                    </span>
+                    <div>
+                        <div class="stat-tile__value">@Model.TotalOvertimeHours.ToString("0.#")h</div>
+                        <div class="stat-tile__label">Overtime Hours</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="stat-tile">
+                    <span class="stat-tile__icon stat-tile__icon--good">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4" /><path d="M4 21c0-4.5 3.5-7 8-7s8 2.5 8 7" /></svg>
+                    </span>
+                    <div>
+                        <div class="stat-tile__value">@Model.EmployeesTracked</div>
+                        <div class="stat-tile__label">Employees Tracked</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @if (Model.TotalWorkedHours <= 0)
+        {
+            <p class="text-muted mb-0">No verified work hours recorded for this period yet.</p>
+        }
+        else
+        {
+            var maxHours = Model.ChartPoints.Count > 0 ? Model.ChartPoints.Max(p => p.TotalHours) : 0;
+            <div class="hours-chart">
+                @foreach (var point in Model.ChartPoints)
+                {
+                    var regularHours = point.TotalHours - point.OvertimeHours;
+                    var regularPct = maxHours > 0 ? (regularHours / maxHours * 100) : 0;
+                    var overtimePct = maxHours > 0 ? (point.OvertimeHours / maxHours * 100) : 0;
+                    <div class="hours-chart__row">
+                        <div class="hours-chart__label" title="@point.Label">@point.Label</div>
+                        <div class="hours-chart__track">
+                            <div class="hours-chart__bar hours-chart__bar--regular" style="width: @regularPct.ToString("0.##")%"></div>
+                            @if (point.OvertimeHours > 0)
+                            {
+                                <div class="hours-chart__bar hours-chart__bar--overtime" style="width: @overtimePct.ToString("0.##")%"></div>
+                            }
+                        </div>
+                        <div class="hours-chart__value">@point.TotalHours.ToString("0.#")h</div>
+                    </div>
+                }
+            </div>
+            @if (Model.TotalOvertimeHours > 0)
+            {
+                <div class="d-flex gap-3 mt-2 small text-muted">
+                    <span><span class="hours-chart__legend-swatch hours-chart__legend-swatch--regular"></span> Regular</span>
+                    <span><span class="hours-chart__legend-swatch hours-chart__legend-swatch--overtime"></span> Overtime</span>
+                </div>
+            }
+        }
+    </div>
+</div>
