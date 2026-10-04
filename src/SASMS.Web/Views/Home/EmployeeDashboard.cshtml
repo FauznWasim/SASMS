@@ -35,7 +35,7 @@
                             @foreach (var a in recentAttendance)
                             {
                                 <tr>
-                                    <td>@a.AttendanceDate</td>
+                                    <td>@a.AttendanceDate.ToString("dd/MM/yy")</td>
                                     <td><partial name="_StatusBadge" model="a.AttendanceStatus.ToBadge()" /></td>
                                     <td><partial name="_StatusBadge" model="a.VerificationStatus.ToBadge()" /></td>
                                 </tr>
@@ -63,7 +63,7 @@
                             @foreach (var s in upcomingSchedules)
                             {
                                 <tr>
-                                    <td>@s.ShiftDate</td>
+                                    <td>@s.ShiftDate.ToString("dd/MM/yy")</td>
                                     <td>@s.StartTime - @s.EndTime</td>
                                 </tr>
                             }

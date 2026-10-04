@@ -23,9 +23,9 @@
                         @foreach (var a in Model)
                         {
                             <tr>
-                                <td>@a.AttendanceDate</td>
-                                <td>@(a.CheckInTime is not null ? BusinessClock.ToMalaysiaTime(a.CheckInTime.Value).ToString() : "")</td>
-                                <td>@(a.CheckOutTime is not null ? BusinessClock.ToMalaysiaTime(a.CheckOutTime.Value).ToString() : "")</td>
+                                <td>@a.AttendanceDate.ToString("dd/MM/yy")</td>
+                                <td>@(a.CheckInTime is not null ? BusinessClock.ToMalaysiaTime(a.CheckInTime.Value).ToString("dd/MM/yy h:mm:ss tt") : "")</td>
+                                <td>@(a.CheckOutTime is not null ? BusinessClock.ToMalaysiaTime(a.CheckOutTime.Value).ToString("dd/MM/yy h:mm:ss tt") : "")</td>
                                 <td><partial name="_StatusBadge" model="a.AttendanceStatus.ToBadge()" /></td>
                                 <td><partial name="_StatusBadge" model="a.VerificationStatus.ToBadge()" /></td>
                             </tr>

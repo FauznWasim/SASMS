@@ -9,10 +9,16 @@
 
 <form method="get" class="row g-2 mb-3">
     <div class="col-auto">
-        <input type="date" name="from" class="form-control" value="@Context.Request.Query["from"]" />
+        <div class="date-field">
+            <input type="date" name="from" class="form-control date-field-native visually-hidden" value="@Context.Request.Query["from"]" />
+            <input type="text" class="form-control date-field-text" readonly placeholder="DD/MM/YY" />
+        </div>
     </div>
     <div class="col-auto">
-        <input type="date" name="to" class="form-control" value="@Context.Request.Query["to"]" />
+        <div class="date-field">
+            <input type="date" name="to" class="form-control date-field-native visually-hidden" value="@Context.Request.Query["to"]" />
+            <input type="text" class="form-control date-field-text" readonly placeholder="DD/MM/YY" />
+        </div>
     </div>
     <div class="col-auto">
         <button type="submit" class="btn btn-outline-primary">Filter</button>
@@ -33,7 +39,10 @@
                 </select>
             </div>
             <div class="col-auto">
-                <input type="date" name="date" class="form-control" required value="@BusinessClock.Today.ToString("yyyy-MM-dd")" />
+                <div class="date-field">
+                    <input type="date" name="date" class="form-control date-field-native visually-hidden" required value="@BusinessClock.Today.ToString("yyyy-MM-dd")" />
+                    <input type="text" class="form-control date-field-text" readonly placeholder="DD/MM/YY" />
+                </div>
             </div>
             <div class="col-auto">
                 <button type="submit" class="btn btn-outline-danger">Mark Absent</button>
@@ -60,9 +69,9 @@
                     {
                         <tr>
                             <td>@a.Employee.FullName</td>
-                            <td>@a.AttendanceDate</td>
-                            <td>@(a.CheckInTime is not null ? BusinessClock.ToMalaysiaTime(a.CheckInTime.Value).ToString() : "")</td>
-                            <td>@(a.CheckOutTime is not null ? BusinessClock.ToMalaysiaTime(a.CheckOutTime.Value).ToString() : "")</td>
+                            <td>@a.AttendanceDate.ToString("dd/MM/yy")</td>
+                            <td>@(a.CheckInTime is not null ? BusinessClock.ToMalaysiaTime(a.CheckInTime.Value).ToString("dd/MM/yy h:mm:ss tt") : "")</td>
+                            <td>@(a.CheckOutTime is not null ? BusinessClock.ToMalaysiaTime(a.CheckOutTime.Value).ToString("dd/MM/yy h:mm:ss tt") : "")</td>
                             <td><partial name="_StatusBadge" model="a.AttendanceStatus.ToBadge()" /></td>
                             <td><partial name="_StatusBadge" model="a.VerificationStatus.ToBadge()" /></td>
                             <td>

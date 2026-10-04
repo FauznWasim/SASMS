@@ -20,7 +20,7 @@
                     @foreach (var s in Model)
                     {
                         <tr>
-                            <td>@s.ShiftDate</td>
+                            <td>@s.ShiftDate.ToString("dd/MM/yy")</td>
                             <td>@s.StartTime</td>
                             <td>@s.EndTime</td>
                             <td>@s.Notes</td>

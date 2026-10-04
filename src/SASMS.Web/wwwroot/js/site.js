@@ -36,22 +36,41 @@ document.addEventListener('click', function (event) {
 });
 
 // Native <input type="date"> pickers render in the browser/OS locale's own format, which
-// isn't overridable via HTML/CSS and may show MM/DD/YYYY for some users even though SASMS
-// is a DD/MM/YYYY (Malaysia) application. Rather than fight the native widget, this shows an
-// always-DD/MM/YYYY confirmation of the selected value next to each date field. The input's
-// own value/name/validation are untouched, so form submission and model binding are unaffected.
+// isn't overridable via HTML/CSS — so SASMS can't just rely on it to always show DD/MM/YY.
+// Each ".date-field" (see site.css) pairs the real, visually-hidden native input (still the
+// thing actually submitted/bound — value/name/validation untouched) with a readonly text
+// field that always displays dd/MM/yy. Clicking/activating the text field opens the native
+// picker; the native input's own change event keeps the text field in sync.
 document.addEventListener('DOMContentLoaded', function () {
-    document.querySelectorAll('input[type="date"]').forEach(function (input) {
-        var hint = document.createElement('small');
-        hint.className = 'form-text text-muted sasms-date-hint';
-        input.insertAdjacentElement('afterend', hint);
-
-        function updateHint() {
-            var parts = input.value.split('-'); // native value is always yyyy-MM-dd
-            hint.textContent = parts.length === 3 ? (parts[2] + '/' + parts[1] + '/' + parts[0]) : '';
+    document.querySelectorAll('.date-field').forEach(function (wrapper) {
+        var native = wrapper.querySelector('.date-field-native');
+        var text = wrapper.querySelector('.date-field-text');
+        if (!native || !text) {
+            return;
         }
 
-        updateHint();
-        input.addEventListener('change', updateHint);
+        function updateText() {
+            var parts = native.value.split('-'); // native value is always yyyy-MM-dd
+            text.value = parts.length === 3 ? (parts[2] + '/' + parts[1] + '/' + parts[0].slice(2)) : '';
+        }
+
+        function openPicker() {
+            if (typeof native.showPicker === 'function') {
+                native.showPicker();
+            } else {
+                native.focus();
+            }
+        }
+
+        text.addEventListener('click', openPicker);
+        text.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                openPicker();
+            }
+        });
+        native.addEventListener('change', updateText);
+
+        updateText();
     });
 });

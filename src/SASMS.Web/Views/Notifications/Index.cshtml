@@ -17,7 +17,7 @@
         <div class="list-group-item @(n.IsRead ? "" : "notification-unread")">
             <div class="d-flex w-100 justify-content-between">
                 <h6 class="mb-1">@n.Title</h6>
-                <small>@BusinessClock.ToMalaysiaTime(n.CreatedAtUtc)</small>
+                <small>@BusinessClock.ToMalaysiaTime(n.CreatedAtUtc).ToString("dd/MM/yy h:mm:ss tt")</small>
             </div>
             <p class="mb-1">@n.Message</p>
             @if (!n.IsRead)

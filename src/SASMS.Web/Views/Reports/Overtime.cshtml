@@ -10,8 +10,8 @@
 <div class="card">
     <div class="card-body">
         <form method="get" class="row g-2 mb-3">
-            <div class="col-auto"><input type="date" name="from" class="form-control" value="@from.ToString("yyyy-MM-dd")" /></div>
-            <div class="col-auto"><input type="date" name="to" class="form-control" value="@to.ToString("yyyy-MM-dd")" /></div>
+            <div class="col-auto"><div class="date-field"><input type="date" name="from" class="form-control date-field-native visually-hidden" value="@from.ToString("yyyy-MM-dd")" /><input type="text" class="form-control date-field-text" readonly placeholder="DD/MM/YY" /></div></div>
+            <div class="col-auto"><div class="date-field"><input type="date" name="to" class="form-control date-field-native visually-hidden" value="@to.ToString("yyyy-MM-dd")" /><input type="text" class="form-control date-field-text" readonly placeholder="DD/MM/YY" /></div></div>
             <div class="col-auto"><button type="submit" class="btn btn-outline-primary">View</button></div>
             <div class="col-auto"><a class="btn btn-outline-secondary" asp-action="OvertimeExport" asp-route-from="@from" asp-route-to="@to">Export CSV</a></div>
         </form>
@@ -29,7 +29,7 @@
                 {
                     <tr>
                         <td>@r.EmployeeName</td>
-                        <td>@r.AttendanceDate</td>
+                        <td>@r.AttendanceDate.ToString("dd/MM/yy")</td>
                         <td>@r.HoursWorked.ToString("0.##")</td>
                         <td>@r.OvertimeHours.ToString("0.##")</td>
                     </tr>

@@ -479,6 +479,11 @@ body.login-page {
   justify-content: center;
 }
 
+/* ===== Date input (dd/MM/yy display over a native type=date picker, see site.js) ===== */
+.date-field-text {
+  cursor: pointer;
+}
+
 /* ===== Empty states ===== */
 .empty-state {
   display: flex;

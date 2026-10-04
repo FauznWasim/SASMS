@@ -13,7 +13,10 @@
 
             <div class="mb-3">
                 <label asp-for="ShiftDate" class="form-label"></label>
-                <input asp-for="ShiftDate" class="form-control" />
+                <div class="date-field">
+                    <input asp-for="ShiftDate" class="form-control date-field-native visually-hidden" />
+                    <input type="text" class="form-control date-field-text" readonly placeholder="DD/MM/YY" />
+                </div>
                 <span asp-validation-for="ShiftDate" class="text-danger"></span>
             </div>
             <div class="mb-3">

@@ -35,10 +35,10 @@
         {
             <dl class="row mb-0">
                 <dt class="col-sm-3">Check-in</dt>
-                <dd class="col-sm-9">@(Model.TodayRecord.CheckInTime is not null ? BusinessClock.ToMalaysiaTime(Model.TodayRecord.CheckInTime.Value).ToString() : "")</dd>
+                <dd class="col-sm-9">@(Model.TodayRecord.CheckInTime is not null ? BusinessClock.ToMalaysiaTime(Model.TodayRecord.CheckInTime.Value).ToString("dd/MM/yy h:mm:ss tt") : "")</dd>
                 <dt class="col-sm-3">Check-out</dt>
                 <dd class="col-sm-9">@(Model.TodayRecord.CheckOutTime is not null
-                    ? BusinessClock.ToMalaysiaTime(Model.TodayRecord.CheckOutTime.Value).ToString()
+                    ? BusinessClock.ToMalaysiaTime(Model.TodayRecord.CheckOutTime.Value).ToString("dd/MM/yy h:mm:ss tt")
                     : Model.TodayRecord.VerificationStatus == VerificationStatus.NotApplicable ? "" : "Not checked out yet")</dd>
                 <dt class="col-sm-3">Verification</dt>
                 <dd class="col-sm-9">

@@ -24,8 +24,8 @@
                         <tr>
                             <td>@l.Employee.FullName</td>
                             <td>@l.LeaveType</td>
-                            <td>@l.StartDate</td>
-                            <td>@l.EndDate</td>
+                            <td>@l.StartDate.ToString("dd/MM/yy")</td>
+                            <td>@l.EndDate.ToString("dd/MM/yy")</td>
                             <td>@l.Reason</td>
                             <td><partial name="_StatusBadge" model="l.Status.ToBadge()" /></td>
                             <td>@(l.ReviewedByUser?.Username ?? "-")</td>
