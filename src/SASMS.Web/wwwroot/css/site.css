@@ -170,13 +170,18 @@ body {
   min-width: 0;
 }
 
-.footer {
-  /* Normal document flow at every width — no absolute/fixed positioning, no fixed
-     line-height assuming a single line, text wraps naturally if it doesn't fit. */
-  border-top-color: var(--brand-yellow) !important;
-  border-top-width: 3px !important;
-  padding: 0.75rem 0;
-  line-height: 1.4;
+/* ===== Footer ===== */
+.footer-sasms {
+  /* Normal document flow at every width — no absolute/fixed positioning — so the sticky-
+     footer flex layout above (body/.site-main) keeps working unchanged regardless of how
+     tall this content is. Same background as the navbar, not a separate footer color. */
+  background-color: var(--brand-green-dark);
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+.footer-bottom {
+  padding: 0.9rem 0;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.85rem;
 }
 
 /* ===== Navbar ===== */
