@@ -21,6 +21,7 @@ RUN apt-get update \
         libsm6 \
         libxext6 \
         libxrender1 \
+        libegl1 \
     && rm -rf /var/lib/apt/lists/*
 
 COPY face-service/requirements.txt .
