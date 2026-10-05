@@ -22,6 +22,7 @@ RUN apt-get update \
         libxext6 \
         libxrender1 \
         libegl1 \
+        libgles2 \
     && rm -rf /var/lib/apt/lists/*
 
 COPY face-service/requirements.txt .
